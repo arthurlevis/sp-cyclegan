@@ -7,8 +7,11 @@ debug*
 datasets/
 checkpoints/
 results/
+logs/
 build/
+conda-env/
 dist/
+paper_vis/
 *.png
 torch.egg-info/
 */**/__pycache__
