@@ -15,4 +15,4 @@ If you use our code for your research, please cite our paper.
 ```
 
 ### Acknowledgments
-Our code is adapted from Contrastive Unpaired Translation (CUT)](https://github.com/taesungp/contrastive-unpaired-translation).
+Our code is adapted from [Contrastive Unpaired Translation (CUT)](https://github.com/taesungp/contrastive-unpaired-translation).
