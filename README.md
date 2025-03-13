@@ -1,4 +1,4 @@
-# Structure-preserving image translation for depth estimation in colonoscopy
+# Structure-preserving image translation for pose estimation in colonoscopy
 
 (modified by Arthur Levisalles)
 
