@@ -10,7 +10,7 @@ You should **not** expect the method to work on just any random combination of i
 
 ### pix2pix
 
-Python script is provided to generate pix2pix training data in the form of pairs of images {A,B}, where A and B are two different depictions of the same underlying scene. For example, these might be pairs {label map, photo} or {bw image, color image}. Then we can learn to translate A to B or B to A:
+Python script is provided to generate pix2pix training data in the form of pairs of images {A,B}, where A and B are two different depictions of the same underlying scene. Then we can learn to translate A to B or B to A:
 
 Create folder `/path/to/data` with subfolders `A` and `B`. `A` and `B` should each have their own subfolders `train`, `val`, `test`, etc. In `/path/to/data/A/train`, put training images in style A. In `/path/to/data/B/train`, put the corresponding images in style B. Repeat same for other data splits (`val`, `test`, etc).
 
