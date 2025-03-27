@@ -2,8 +2,8 @@
 
 python test.py \
 	--dataroot ./pilot_dataset \
-	--name pilot_experiment \
+	--name pretrained \
+	--epoch 30 \
 	--model cycle_gan_struct \
 	--gpu_ids -1 \
-	--batch_size 4 \
 	--num_test 10
