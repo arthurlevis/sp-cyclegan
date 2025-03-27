@@ -5,7 +5,9 @@ node_modules/
 .DS_Store
 debug*
 datasets/
-checkpoints/
+checkpoints/**
+!checkpoints/pretrained/
+!checkpoints/pretrained/**
 results/
 logs/
 build/
