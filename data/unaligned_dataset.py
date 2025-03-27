@@ -43,6 +43,11 @@ class UnalignedDataset(BaseDataset):
         self.A_size = len(self.A_paths)  # get the size of dataset A
         self.B_size = len(self.B_paths)  # get the size of dataset B
 
+        # Bypass the need of a 'testB' directory during testing (Arthur L.)
+        if opt.phase == "test":
+            self.B_paths = self.A_paths  # reuse A paths as dummy B paths
+            self.B_size = self.A_size  # avoid ZeroDivisionError
+
         self.opt.phase = opt.phase
 
     def __getitem__(self, index):
@@ -84,9 +89,11 @@ class UnalignedDataset(BaseDataset):
         else:
             A, A_depth = transform(A_img), None
 
-        # shuxian: add depth to dict
-        # return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
-        return {'A': A, 'B': B, 'A_depth': A_depth, 'A_paths': A_path, 'B_paths': B_path}
+        # Bypass 'depthA' directory during testing (Arthur L.)
+        output_dict = {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
+        if A_depth is not None:  # only include depth during training
+            output_dict['A_depth'] = A_depth
+        return output_dict
 
     def __len__(self):
         """Return the total number of images in the dataset.
