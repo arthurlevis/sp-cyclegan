@@ -200,28 +200,51 @@ class BaseModel(ABC):
             epoch (int) -- current epoch; used in the file name '%s_net_%s.pth' % (epoch, name)
         """
         for name in self.model_names:
-            if isinstance(name, str):
-                load_filename = '%s_net_%s.pth' % (epoch, name)
-                if self.opt.isTrain and self.opt.pretrained_name is not None:
-                    load_dir = os.path.join(self.opt.checkpoints_dir, self.opt.pretrained_name)
-                else:
-                    load_dir = self.save_dir
+            # if isinstance(name, str):
+            #     load_filename = '%s_net_%s.pth' % (epoch, name)
+                # if self.opt.isTrain and self.opt.pretrained_name is not None:
+                #     load_dir = os.path.join(self.opt.checkpoints_dir, self.opt.pretrained_name)
+                # else:
+                #     load_dir = self.save_dir
 
-                load_path = os.path.join(load_dir, load_filename)
-                net = getattr(self, 'net' + name)
-                if isinstance(net, torch.nn.DataParallel):
-                    net = net.module
-                print('loading the model from %s' % load_path)
-                # if you are using PyTorch newer than 0.4 (e.g., built from
-                # GitHub source), you can remove str() on self.device
-                state_dict = torch.load(load_path, map_location=str(self.device))
-                if hasattr(state_dict, '_metadata'):
-                    del state_dict._metadata
+            #     load_path = os.path.join(load_dir, load_filename)
+            #     net = getattr(self, 'net' + name)
+            #     if isinstance(net, torch.nn.DataParallel):
+            #         net = net.module
+            #     print('loading the model from %s' % load_path)
+            #     # if you are using PyTorch newer than 0.4 (e.g., built from
+            #     # GitHub source), you can remove str() on self.device
+            #     state_dict = torch.load(load_path, map_location=str(self.device))
+            #     if hasattr(state_dict, '_metadata'):
+            #         del state_dict._metadata
 
-                # patch InstanceNorm checkpoints prior to 0.4
-                # for key in list(state_dict.keys()):  # need to copy keys here because we mutate in loop
-                #    self.__patch_instance_norm_state_dict(state_dict, net, key.split('.'))
-                net.load_state_dict(state_dict)
+            #     # patch InstanceNorm checkpoints prior to 0.4
+            #     # for key in list(state_dict.keys()):  # need to copy keys here because we mutate in loop
+            #     #    self.__patch_instance_norm_state_dict(state_dict, net, key.split('.'))
+            #     net.load_state_dict(state_dict)
+
+            """
+            Ensure compatibility with both CPU & GPU training/testing (by Arthur Levisalles)
+            
+            The above logic assumes the 'module.' prefix is always present in the state_dict keys.
+            This prefix is added by DataParallel during training, but testing on CPU expects key without it.
+            """
+
+            net = getattr(self, 'net' + name)
+            load_filename = '%s_net_%s.pth' % (epoch, name)
+            load_path = os.path.join(self.save_dir, load_filename)
+            
+            state_dict = torch.load(load_path, map_location=self.device)
+            
+            new_state_dict = {}
+            for k, v in state_dict.items():
+                name = k.replace('module.', '')  # Remove 'module.' prefix
+                new_state_dict[name] = v
+                
+            if isinstance(net, torch.nn.DataParallel):
+                net = net.module  # Access the underlying model if using DataParallel
+                
+            net.load_state_dict(new_state_dict)
 
     def print_networks(self, verbose):
         """Print the total number of parameters in the network and (if verbose) network architecture
