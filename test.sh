@@ -1,12 +1,9 @@
 #!/bin/bash
 
-python train.py \
+python test.py \
 	--dataroot ./pilot_dataset \
 	--name pilot_experiment \
 	--model cycle_gan_struct \
-	--lambda_struct 1.0 \
 	--gpu_ids -1 \
 	--batch_size 4 \
-	--n_epochs 2 \
-	--n_epochs_decay 2 \
-	--save_epoch_freq 1
+	--num_test 10
