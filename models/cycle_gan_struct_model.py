@@ -71,7 +71,7 @@ class CycleGANStructModel(BaseModel):
         self.loss_names = ['D_A', 'G_A', 'cycle_A', 'idt_A', 'D_B', 'G_B', 'cycle_B', 'idt_B', 'struct']
         # specify the images you want to save/display. The training/test scripts will call <BaseModel.get_current_visuals>
         visual_names_A = ['real_A', 'fake_B', 'rec_A']
-        visual_names_B = ['real_B', 'fake_A', 'rec_B']
+        visual_names_B = ['real_B', 'fake_A', 'rec_B'] 
         if self.isTrain and self.opt.lambda_identity > 0.0:  # if identity loss is used, we also visualize idt_B=G_A(B) ad idt_A=G_A(B)
             visual_names_A.append('idt_B')
             visual_names_B.append('idt_A')
@@ -129,8 +129,15 @@ class CycleGANStructModel(BaseModel):
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
-        # shuxian: load depths as well
-        if AtoB:
+        # # shuxian: load depths as well
+        # if AtoB:
+        #     self.real_A_depth = input['A_depth'].to(self.device)
+        # else:
+        #     self.real_A_depth = None
+
+        # Only load depths during training (Arthur Levisalles)
+        # if self.isTrain and AtoB and 'A_depth' in input:
+        if self.isTrain and AtoB:
             self.real_A_depth = input['A_depth'].to(self.device)
         else:
             self.real_A_depth = None
@@ -139,8 +146,15 @@ class CycleGANStructModel(BaseModel):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
         self.fake_B = self.netG_A(self.real_A)  # G_A(A)
         self.rec_A = self.netG_B(self.fake_B)   # G_B(G_A(A))
-        self.fake_A = self.netG_B(self.real_B)  # G_B(B)
-        self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
+        # self.fake_A = self.netG_B(self.real_B)  # G_B(B)
+        # self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
+
+        # NEW -------------------------------------------------
+        # Skip real_B-related operations in single mode
+        if self.opt.dataset_mode != 'single':
+            self.fake_A = self.netG_B(self.real_B)  # G_B(B)
+            self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
+        #  -------------------------------------------------
 
     def backward_D_basic(self, netD, real, fake):
         """Calculate GAN loss for the discriminator
