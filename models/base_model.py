@@ -227,7 +227,7 @@ class BaseModel(ABC):
             Ensure compatibility with both CPU & GPU training/testing (by Arthur Levisalles)
             
             The above logic assumes the 'module.' prefix is always present in the state_dict keys.
-            This prefix is added by DataParallel during training, but testing on CPU expects key without it.
+            This prefix is added by DataParallel during training, but testing on CPU expects keys without it.
             """
 
             net = getattr(self, 'net' + name)
