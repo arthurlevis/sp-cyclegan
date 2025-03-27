@@ -7,6 +7,6 @@ python train.py \
 	--lambda_struct 1.0 \
 	--gpu_ids -1 \
 	--batch_size 4 \
-	--n_epochs 2 \
-	--n_epochs_decay 2 \
+	--n_epochs 1 \
+	--n_epochs_decay 1 \
 	--save_epoch_freq 1
