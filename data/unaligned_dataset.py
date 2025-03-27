@@ -27,26 +27,48 @@ class UnalignedDataset(BaseDataset):
         """
         BaseDataset.__init__(self, opt)
         self.dir_A = os.path.join(opt.dataroot, opt.phase + 'A')  # create a path '/path/to/data/trainA'
-        self.dir_B = os.path.join(opt.dataroot, opt.phase + 'B')  # create a path '/path/to/data/trainB'
+        # self.dir_B = os.path.join(opt.dataroot, opt.phase + 'B')  # create a path '/path/to/data/trainB'
+        if opt.phase == "test":
+            self.dir_B = self.dir_A  # Use testA as dummy for testB
+        else:
+            self.dir_B = os.path.join(opt.dataroot, opt.phase + 'B')
 
         # shuxian: add depth directory
         self.depth_dir_A = os.path.join(opt.dataroot, 'depthA')
         self.A_depth_paths = sorted(make_dataset(self.depth_dir_A, opt.max_dataset_size))
 
+        # if opt.phase == "test" and not os.path.exists(self.dir_A) \
+        #    and os.path.exists(os.path.join(opt.dataroot, "valA")):
+        #     self.dir_A = os.path.join(opt.dataroot, "valA")
+        #     self.dir_B = os.path.join(opt.dataroot, "valB")
+
+        # self.A_paths = sorted(make_dataset(self.dir_A, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
+        # self.B_paths = sorted(make_dataset(self.dir_B, opt.max_dataset_size))    # load images from '/path/to/data/trainB'
+        # self.A_size = len(self.A_paths)  # get the size of dataset A
+        # self.B_size = len(self.B_paths)  # get the size of dataset B
+
+        # # Bypass the need of a 'testB' directory during testing (Arthur Levisalles)
+        # if opt.phase == "test":
+        #     self.dir_B = self.dir_A
+        #     self.B_paths = self.A_paths  # reuse A paths as dummy B paths
+        #     self.B_size = self.A_size  # avoid ZeroDivisionError
+
+        # Original code for valA/valB fallback (keep this if needed)
         if opt.phase == "test" and not os.path.exists(self.dir_A) \
-           and os.path.exists(os.path.join(opt.dataroot, "valA")):
+        and os.path.exists(os.path.join(opt.dataroot, "valA")):
             self.dir_A = os.path.join(opt.dataroot, "valA")
             self.dir_B = os.path.join(opt.dataroot, "valB")
 
-        self.A_paths = sorted(make_dataset(self.dir_A, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
-        self.B_paths = sorted(make_dataset(self.dir_B, opt.max_dataset_size))    # load images from '/path/to/data/trainB'
-        self.A_size = len(self.A_paths)  # get the size of dataset A
-        self.B_size = len(self.B_paths)  # get the size of dataset B
-
-        # Bypass the need of a 'testB' directory during testing (Arthur L.)
+        # Load paths using the updated dir_A/dir_B
+        self.A_paths = sorted(make_dataset(self.dir_A, opt.max_dataset_size))
+        self.B_paths = sorted(make_dataset(self.dir_B, opt.max_dataset_size))  
+        
+        # Ensure B_paths = A_paths for testing
         if opt.phase == "test":
-            self.B_paths = self.A_paths  # reuse A paths as dummy B paths
-            self.B_size = self.A_size  # avoid ZeroDivisionError
+            self.B_paths = self.A_paths  # Final safety
+
+        self.A_size = len(self.A_paths)
+        self.B_size = len(self.B_paths) if opt.phase != "test" else self.A_size
 
         self.opt.phase = opt.phase
 
@@ -89,7 +111,7 @@ class UnalignedDataset(BaseDataset):
         else:
             A, A_depth = transform(A_img), None
 
-        # Bypass 'depthA' directory during testing (Arthur L.)
+        # Bypass 'depthA' directory during testing (Arthur Levisalles)
         output_dict = {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
         if A_depth is not None:  # only include depth during training
             output_dict['A_depth'] = A_depth
