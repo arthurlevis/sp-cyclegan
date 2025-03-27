@@ -2,6 +2,7 @@
 
 python test.py \
 	--dataroot ./pilot_dataset \
+	--checkpoints_dir . \
 	--name pretrained \
 	--epoch 30 \
 	--model cycle_gan_struct \
