@@ -146,15 +146,8 @@ class CycleGANStructModel(BaseModel):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
         self.fake_B = self.netG_A(self.real_A)  # G_A(A)
         self.rec_A = self.netG_B(self.fake_B)   # G_B(G_A(A))
-        # self.fake_A = self.netG_B(self.real_B)  # G_B(B)
-        # self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
-
-        # NEW -------------------------------------------------
-        # Skip real_B-related operations in single mode
-        if self.opt.dataset_mode != 'single':
-            self.fake_A = self.netG_B(self.real_B)  # G_B(B)
-            self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
-        #  -------------------------------------------------
+        self.fake_A = self.netG_B(self.real_B)  # G_B(B)
+        self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
 
     def backward_D_basic(self, netD, real, fake):
         """Calculate GAN loss for the discriminator
