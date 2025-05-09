@@ -19,3 +19,8 @@ If you use the code for your research, please cite the original paper.
 
 ### Acknowledgments
 The code is adapted from [Contrastive Unpaired Translation (CUT)](https://github.com/taesungp/contrastive-unpaired-translation).
+
+### Create conda environment
+```
+conda env create -f environment.yml
+```
