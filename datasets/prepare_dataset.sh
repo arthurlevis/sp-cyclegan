@@ -2,8 +2,8 @@
 
 # Run training script on cluster
 python prepare_dataset.py \
-    --dataset_path /SAN/medic/RealCol/pilot_dataset \
-    --synthetic1 /SAN/medic/RealCol/datasets_zip/synth2.zip \
-    --synthetic2 /SAN/medic/RealCol/datasets_zip/synth3.zip \
-    --real /SAN/medic/RealCol/datasets_zip/real.zip 
+    --dataset_path /SAN/medic/RealCol/exp1_dataset \
+    --synthetic1 /SAN/medic/RealCol/datasets_zip/SyntheticColon_II.zip \
+    --synthetic2 /SAN/medic/RealCol/datasets_zip/SyntheticColon_III.zip \
+    --real /SAN/medic/RealCol/datasets_zip/oblique_train.zip 
  

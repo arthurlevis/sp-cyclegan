@@ -28,14 +28,22 @@ def process_synthetic_data(synthetic_dirs, train_a_path, depth_a_path):
     for dir_path in synthetic_dirs:
 
         # Get all RGB & depth frames
-        rgb_frames = glob.glob(os.path.join(dir_path, "**", "FrameBuffer_*.png"), recursive=True)
-        depth_frames = glob.glob(os.path.join(dir_path, "**", "Depth_*.png"), recursive=True)
+        # # SimCol
+        # rgb_frames = glob.glob(os.path.join(dir_path, "**", "FrameBuffer_*.png"), recursive=True)
+        # depth_frames = glob.glob(os.path.join(dir_path, "**", "Depth_*.png"), recursive=True)
+        # C3VD
+        rgb_frames = glob.glob(os.path.join(dir_path, "**", "*_color.png"), recursive=True)
+        depth_frames = glob.glob(os.path.join(dir_path, "**", "*_depth.png"), recursive=True)
 
         print(f"  Found {len(rgb_frames)} RGB frames & {len(depth_frames)} depth frames")
         
         # Sort frames by number
-        rgb_frames.sort(key=lambda x: int(re.search(r'FrameBuffer_(\d+)\.png', x).group(1)))
-        depth_frames.sort(key=lambda x: int(re.search(r'Depth_(\d+)\.png', x).group(1)))
+        # SimCol
+        # rgb_frames.sort(key=lambda x: int(re.search(r'FrameBuffer_(\d+)\.png', x).group(1)))
+        # depth_frames.sort(key=lambda x: int(re.search(r'Depth_(\d+)\.png', x).group(1)))
+        # C3VD
+        rgb_frames.sort(key=lambda x: int(re.search(r'(\d+)_color\.png', x).group(1)))
+        depth_frames.sort(key=lambda x: int(re.search(r'(\d+)_depth\.png', x).group(1)))
         
         # Ensure matching pairs
         min_frames = min(len(rgb_frames), len(depth_frames))
@@ -43,11 +51,11 @@ def process_synthetic_data(synthetic_dirs, train_a_path, depth_a_path):
         for i in range(min_frames):
 
             # Copy RGB frames to trainA
-            rgb_dest = os.path.join(train_a_path, f"{image_count:04d}.png")
+            rgb_dest = os.path.join(train_a_path, f"{image_count:05}.png")
             shutil.copy(rgb_frames[i], rgb_dest)
             
             # Copy depth frames to depthA
-            depth_dest = os.path.join(depth_a_path, f"{image_count:04d}.png")
+            depth_dest = os.path.join(depth_a_path, f"{image_count:05d}.png")
             shutil.copy(depth_frames[i], depth_dest)
             
             image_count += 1
@@ -66,7 +74,7 @@ def process_real_data(real_dir, train_b_path):
     
     # Copy images to trainB
     for img_path in image_files:
-        img_dest = os.path.join(train_b_path, f"{image_count:04d}.jpg")
+        img_dest = os.path.join(train_b_path, f"{image_count:05d}.jpg")
         try:
             # Ensure the image can be opened
             img = Image.open(img_path)
@@ -80,6 +88,7 @@ def process_real_data(real_dir, train_b_path):
 
 def create_folders(dataset_path):
     for folder in ['trainA', 'trainB', 'depthA']:
+    # for folder in ['trainA', 'depthA']:
         folder_path = os.path.join(dataset_path, folder)
         os.makedirs(folder_path, exist_ok=True)
     
@@ -109,6 +118,7 @@ def main():
         '--synthetic2',
         dest='synthetic2',
         required=False,
+        default=None, 
         help='Path to second synthetic zip file (Optional)'
     )
     parser.add_argument(
@@ -124,7 +134,6 @@ def main():
     os.makedirs(temp_dir, exist_ok=True)
 
     # Create temp extraction directories
-    # temp_dir = os.path.join(args.dataset_path, 'temp')
     synth1_dir = os.path.join(temp_dir, 'synth1')
     synth2_dir = os.path.join(temp_dir, 'synth2')
     real_dir = os.path.join(temp_dir, 'real')
@@ -136,16 +145,25 @@ def main():
     
     # Extract zip files
     extract_zip(args.synthetic1, synth1_dir)
-    extract_zip(args.synthetic2, synth2_dir)
+    # extract_zip(args.synthetic2, synth2_dir)
+    if args.synthetic2:  
+        extract_zip(args.synthetic2, synth2_dir)
     extract_zip(args.real, real_dir)
     
     # Create required folders
-    # train_a_path, train_b_path, depth_a_path = create_folders(args.dataset_path)
     temp_train_a, temp_train_b, temp_depth_a = create_folders(temp_dir)
+    # temp_train_a, temp_depth_a = create_folders(temp_dir)
     
     # Get all synthetic directories containing frames
     synth_dirs = []
-    for root_dir in [synth1_dir, synth2_dir]:
+    # for root_dir in [synth1_dir, synth2_dir]:
+    #     print(f"Examining root directory: {root_dir}")
+    #     for entry in os.listdir(root_dir):
+    #         dir_path = os.path.join(root_dir, entry)
+    #         if os.path.isdir(dir_path):
+    #             synth_dirs.append(dir_path)
+    #             print(f"Added directory: {dir_path}")
+    for root_dir in [synth1_dir] + ([synth2_dir] if args.synthetic2 else []):
         print(f"Examining root directory: {root_dir}")
         for entry in os.listdir(root_dir):
             dir_path = os.path.join(root_dir, entry)
@@ -165,6 +183,7 @@ def main():
 
     # Create final destination directories
     train_a_path, train_b_path, depth_a_path = create_folders(args.dataset_path)
+    # train_a_path, depth_a_path = create_folders(args.dataset_path)
     
     # Copy final processed data to target location
     print("Copying processed data to final destination...")
