@@ -49,10 +49,10 @@ test/data/legacy_serialized.pt
 .idea
 
 # Bash scripts
-# train.sh
+train.sh
 test.sh
 
 # 
-# datasets/prepare_dataset.py
-# datasets/prepare_dataset.sh
+datasets/prepare_dataset.py
+datasets/prepare_dataset.sh
 
