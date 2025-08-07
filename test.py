@@ -33,10 +33,13 @@ from models import create_model
 from util.visualizer import save_images
 from util import html
 import util.util as util
+import time
+from datetime import datetime
 
 
 if __name__ == '__main__':
     opt = TestOptions().parse()  # get test options
+
     # hard-code some parameters for test
     opt.num_threads = 0   # test code only supports num_threads = 0 (no multi-threading) / test_opt reflects initial option (4)
     opt.batch_size = 1    # test code only supports batch_size = 1
@@ -46,8 +49,12 @@ if __name__ == '__main__':
     dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
     train_dataset = create_dataset(util.copyconf(opt, phase="train"))
     model = create_model(opt)      # create a model given opt.model and other options
+
     # create a webpage for viewing the results
     web_dir = os.path.join(opt.results_dir, opt.name, '{}_{}'.format(opt.phase, opt.epoch))  # define the website directory
+    # # Arthur: add timestamp to create unique results_dir
+    # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # web_dir = os.path.join(opt.results_dir, f"{opt.name}_{timestamp}", '{}_{}'.format(opt.phase, opt.epoch))
     print('creating web directory', web_dir)
     webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s' % (opt.name, opt.phase, opt.epoch))
 

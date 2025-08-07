@@ -5,6 +5,7 @@ import ntpath
 import time
 from . import util, html
 from subprocess import Popen, PIPE
+import torch
 
 if sys.version_info[0] == 2:
     VisdomExceptionBase = Exception
@@ -187,6 +188,12 @@ class Visualizer():
                     links.append(img_path)
                 webpage.add_images(ims, txts, links, width=self.win_size)
             webpage.save()
+        
+        if hasattr(self, 'writer') and self.writer is not None and (save_result or not self.saved):  # save images to tensorboard
+            for label, image in visuals.items():
+                image_tensor = util.tensor2im(image).transpose(2, 0, 1)
+                image_tensor = torch.from_numpy(image_tensor).float() / 255.0
+                self.writer.add_image(f'Images/{label}', image_tensor, epoch)
 
     def plot_current_losses(self, epoch, counter_ratio, losses):
         """display the current losses on visdom display: dictionary of error labels and values

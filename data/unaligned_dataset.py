@@ -94,9 +94,15 @@ class UnalignedDataset(BaseDataset):
         B_img = Image.open(B_path).convert('RGB')
 
         # shuxian: load depths
-        A_depth_path = self.A_depth_paths[index % self.A_size]
-        A_depth_img = np.array(Image.open(A_depth_path)).astype(np.float32) / (2**16 - 1)  # convert to [0, 1] float32
-        A_depth_img = Image.fromarray(A_depth_img) # convert to Image
+        # A_depth_path = self.A_depth_paths[index % self.A_size]
+        # A_depth_img = np.array(Image.open(A_depth_path)).astype(np.float32) / (2**16 - 1)  # convert to [0, 1] float32
+        # A_depth_img = Image.fromarray(A_depth_img) # convert to Image
+        if self.opt.phase == 'train':
+            A_depth_path = self.A_depth_paths[index % self.A_size]
+            A_depth_img = np.array(Image.open(A_depth_path)).astype(np.float32) / (2**16 - 1)  # convert to [0, 1] float32
+            A_depth_img = Image.fromarray(A_depth_img) # convert to Image
+        else:
+            A_depth_img = None
 
         # Apply image transformation
         # For CUT/FastCUT mode, if in finetuning phase (learning rate is decaying),
